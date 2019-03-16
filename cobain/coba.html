@@ -1,0 +1,95 @@
+<table id="example1" class="table table-bordered table-striped">
+  <thead>
+  <tr>
+    <th>Kode Proyek</th>
+    <th>Nama Proyek</th>
+    <th>Real Cost</th>
+    <th>Real Waktu</th>
+    <th>TCF</th>
+    <th>EF</th>
+    <th>UAW</th>
+    <th>UUCW</th>
+    <th>UUCP</th>
+    <th>UCP</th>
+    <th id="btnedit"><center>Edit</center></th>
+  </tr>
+  </thead>
+  <tbody>
+  <?php
+    $no = 1;
+    $query = mysql_query("SELECT * FROM proyek,ef,tcf,uaw,uucw WHERE proyek.id_proyek = ef.id_proyek AND proyek.id_proyek = tcf.id_proyek AND proyek.id_proyek = uaw.id_proyek AND proyek.id_proyek = uucw.id_proyek");
+    while ($data = mysql_fetch_array($query)) {
+    $hasil3[] = $data;
+    }
+    foreach ($hasil3 as $x) {
+      $tcf = floatval($x['rumus']);
+      $ef = floatval($x['rumus_ef']);
+      $uaw = $x['total'];
+      $uucw = $x['hasil'];
+      $uucp = $uaw+$uucw;
+      $ucp = $uucp*$tcf*$ef;
+      $cost = floatval($x['real_penghasilan']);
+      $cost1 = floatval($x['real_penghasilan'])/1000;
+      $sumcost += $cost1;
+      $sumrc += round($ucp,2);
+      $sumrw += floatval($x['real_waktu']);
+      $sumrc2 += (round($ucp,2)*round($ucp,2));
+      $sumrw2 += (floatval($x['real_waktu'])*floatval($x['real_waktu']));
+      $rcost += round((round(floatval($cost1),2)*round(floatval($ucp),2)),2);
+      $hoef = $ucp*7;
+      $aeucp += (round($ucp,2)*floatval($x['real_waktu']));
+  ?>
+  <tr>
+    <td><?php echo $x['id_proyek'];?></td>
+    <td><?php echo $x['nama_proyek'];?></td>
+    <td><?php echo "Rp. ".number_format($cost,0,",",".");?></td>
+    <td><?php echo $x['real_waktu'];?></td>
+    <td><?php echo $tcf;?></td>
+    <td><?php echo $ef;?></td>
+    <td><?php echo $uaw;?></td>
+    <td><?php echo $uucw;?></td>
+    <td><?php echo round($uucp,2);?></td>
+    <td><?php echo round($ucp,2);?></td>
+    <td><center><a href="edit.php?id_proyek=<?php echo $x['id_proyek'];?>" class="btn btn-warning"><i class="fa fa-pencil"></i></a></center></td>
+  </tr>
+  <?php
+    $sumtotalData +=1 ;
+    }
+  ?>
+  <?php
+    $a = $sumtotalData * $aeucp;
+    $b = $sumrc * $sumrw;
+    $c = $sumtotalData * round($sumrc2,2);
+    $d = round($sumrc * $sumrc,2);
+
+    $a2 = $sumtotalData * $rcost;
+    $b2 = $sumrc * $sumcost;
+    $c2 = $sumtotalData * round($sumrc2,2);
+    $d2 = round($sumrc * $sumrc,2);
+    if (($c-$d) == 0) {
+      $e = 1;
+    }else{
+      $e = $c-$d;
+    }
+    if (($c2-$d2) == 0) {
+      $e2 = 1;
+    }else{
+      $e2 = $c2-$d2;
+    }
+    $ermh = round(abs(($a-$b)/($e)),3);
+    $ercmh = round(abs(($a2-$b2)/($e2)),3);
+  ?>
+  </tbody>
+  <tfoot>
+  <tr>
+    <th colspan="8">Effort Rate (Man / Hours)</th>
+    <th colspan="2"><center><?php echo $ermh; ?></center></th>
+    <th></th>
+  </tr>
+  <tr>
+    <th colspan="8">Effort Rate (Man / Hours)</th>
+    <th colspan="2"><center><?php echo $ercmh; ?></center></th>
+    <th></th>
+  </tr>
+  </tfoot>
+</table>
